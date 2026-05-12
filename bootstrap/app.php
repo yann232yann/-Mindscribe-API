@@ -4,6 +4,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,10 +21,47 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [HandleCors::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Non authentifié.'], 401);
+
+        // Toujours retourner du JSON sur les routes API (même sans Accept: application/json)
+        $exceptions->render(function (AuthenticationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Non authentifié.',
+                ], 401);
             }
         });
-    
+
+        $exceptions->render(function (ValidationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Erreur de validation.',
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+        });
+
+        $exceptions->render(function (NotFoundHttpException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Ressource introuvable.',
+                ], 404);
+            }
+        });
+
+        $exceptions->render(function (MethodNotAllowedHttpException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Méthode non autorisée.',
+                ], 405);
+            }
+        });
+
+        $exceptions->render(function (\Throwable $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Erreur serveur. Réessayez dans un moment.',
+                ], 500);
+            }
+        });
+
     })->create();

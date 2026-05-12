@@ -7,6 +7,11 @@ use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\TeamController;
 
+// Gestion des requêtes preflight CORS
+Route::options('{any}', function () {
+    return response()->json([], 204);
+})->where('any', '.*');
+
 // Routes publiques
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
