@@ -100,7 +100,7 @@ class ProcessMeetingAudio implements ShouldQueue
 
         return $response->json('text', '');
     }
-
+ 
     // ── GPT-4o ────────────────────────────────────────────────────────
     private function analyzeWithGPT(string $transcription): array
     {
