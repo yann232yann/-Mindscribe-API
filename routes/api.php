@@ -19,7 +19,7 @@ Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendReset
 Route::post('/auth/reset-password', [PasswordResetController::class, 'resetPassword']);
 
 // Routes protégées
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth.api:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/meetings', [AudioController::class, 'index']);

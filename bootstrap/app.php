@@ -8,6 +8,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use App\Http\Middleware\AuthenticateApi;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(HandleCors::class);
         $middleware->api(prepend: [HandleCors::class]);
+        $middleware->alias([
+            'auth.api' => AuthenticateApi::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 
